@@ -31,17 +31,31 @@ def home(request):
           return Response(data)
      
      elif request.method == 'POST':
-          data = request.POST
+          data = request.data
           serializer = ArticleSerializer(data=data)
-          if serializer.is_valid():
-               return Response('ok')
-          else:
-               return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+          # if serializer.is_valid():
+          #      serializer.save()
+          #      return Response(serializer.data, status=status.HTTP_200_OK)
+          # else:
+          #      return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+          serializer.is_valid(raise_exception=True)
+          serializer.save()
+          return Response(serializer.data, status=status.HTTP_200_OK)
+     
 
 
-@api_view()
+@api_view(['GET', 'PUT', 'DELETE'])
 def detail(request, pk):
      queryset = get_object_or_404(Article, pk=pk)
-     serializer = ArticleDetailSerializer(queryset)
-     data = serializer.data
-     return Response(data)
+     if request.method == 'GET':
+          serializer = ArticleDetailSerializer(queryset)
+          data = serializer.data
+          return Response(data)
+     elif request.method == 'PUT':
+          serializer = ArticleDetailSerializer(instance=queryset, data=request.data)
+          serializer.is_valid(raise_exception=True)
+          serializer.save()
+          return Response(serializer.data, status=status.HTTP_200_OK)
+     elif request.method == 'DELETE':
+          queryset.delete()
+          return Response("Article o'chirildi", status=status.HTTP_204_NO_CONTENT)
