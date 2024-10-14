@@ -14,6 +14,12 @@ class CategorySerializer(serializers.Serializer):
 
 
 
+class CategoryModelSerializer(serializers.ModelSerializer):
+     class Meta:
+          model = Category
+          fields = ['id', 'name']
+
+
 # /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -32,6 +38,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 # /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 # class ArticleDetailSerializer(serializers.Serializer):
 #      id = serializers.IntegerField()
 #      category = serializers.CharField()
@@ -45,13 +52,23 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class ArticleDetailSerializer(serializers.ModelSerializer):
+     # category = CategoryModelSerializer()    ## with modelserializer
+     category = serializers.SerializerMethodField(method_name='get_ctg')    ## with serializer
+
      class Meta:
           model = Article
           # fields = ('__all__')
-          fields = ['id', 'title', 'category', 'category_name', 'subtitle', 'body', 'image', 'created_at', 'updated_at']
+          fields = ['id', 'title', 'category', 'subtitle', 'body', 'image', 'created_at', 'updated_at']
           
-     category_name = serializers.SerializerMethodField(method_name='ctg_name',)
-     def ctg_name(self, obj: Article):
-          return obj.category.name
+     # category_name = serializers.SerializerMethodField(method_name='ctg_name',)
+     # def ctg_name(self, obj: Article):
+     #      return obj.category.name
+
+     def get_ctg(self, obj: Article):
+          ctg = obj.category
+          serilayzer = CategorySerializer(ctg)
+          return serilayzer.data
+
 
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
